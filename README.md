@@ -7,3 +7,5 @@ This simple, yet complete and comprehensive, GitHub Action keeps my modded Minec
 _Expected last restart: not yet run_
 
 _Actual last restart: 2026-07-16 19:14 UTC_
+
+Disclaimer: Times are not precise given GitHub's limitations on scheduled tasks, a different approach might be required soon if it proves unbearable.
