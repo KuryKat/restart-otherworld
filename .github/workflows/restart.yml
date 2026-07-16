@@ -1,14 +1,82 @@
 name: Scheduled Pterodactyl Restart
 
 on:
-  # schedule:
-  #  - cron: '0 0,6,12,18 * * *'
+  schedule:
+    - cron: '30 22,4,10,16 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   restart:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Warnings & countdown
+        run: |
+          PANEL="${{ secrets.PTERODACTYL_PANEL_URL }}"
+          SERVER="${{ secrets.PTERODACTYL_SERVER_ID }}"
+          KEY="${{ secrets.PTERODACTYL_API_KEY }}"
+
+          send() {
+            BODY=$(jq -n --arg cmd "$1" '{command: $cmd}')
+            curl -sf -X POST "$PANEL/api/client/servers/$SERVER/command" \
+              -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+              -H "Accept: Application/vnd.pterodactyl.v1+json" -d "$BODY"
+          }
+
+          # 1 hour 30 minutes
+          send 'tellraw @a [{"text":"[Server] ","color":"gold","bold":true},{"text":"Heads up, restart in ","color":"aqua"},{"text":"1h 30m","color":"gold","bold":true,"hoverEvent":{"action":"show_text","contents":[{"text":"🕐 Restart Reminder 🕐\n","color":"aqua","bold":true},{"text":"Next scheduled restart: ","color":"gray"},{"text":"in 1 hour 30 minutes\n","color":"gold","bold":true},{"text":"Downtime: ","color":"gray"},{"text":"approx. 2 minutes\n","color":"yellow"},{"text":"\nNo rush, just a heads up!","color":"gray","italic":true}]}}]'
+          sleep 3600
+
+          # 30 minutes
+          send 'tellraw @a [{"text":"[Server] ","color":"gold","bold":true},{"text":"Scheduled restart in ","color":"yellow"},{"text":"30 minutes","color":"red","bold":true,"hoverEvent":{"action":"show_text","contents":[{"text":"⚡ Daily Maintenance ⚡\n","color":"yellow","bold":true},{"text":"Server goes down in: ","color":"gray"},{"text":"30 minutes\n","color":"red","bold":true},{"text":"Downtime: ","color":"gray"},{"text":"approx. 2 minutes\n","color":"yellow"},{"text":"\n💡 What to do:\n","color":"aqua","bold":true},{"text":"• Save your progress\n","color":"gray"},{"text":"• Finish up tasks\n","color":"gray"},{"text":"• Head to safe area","color":"gray"}]}},{"text":"\n💾 Make sure to save your progress!","color":"gray","italic":true}]'
+          sleep 900
+
+          # 15 minutes
+          send 'tellraw @a [{"text":"[Server] ","color":"gold","bold":true},{"text":"Restarting in ","color":"yellow"},{"text":"15 minutes!","color":"red","bold":true,"hoverEvent":{"action":"show_text","contents":[{"text":"⚡ Restart Alert ⚡\n","color":"yellow","bold":true},{"text":"Time remaining: ","color":"gray"},{"text":"15 minutes\n","color":"red","bold":true},{"text":"Back online: ","color":"gray"},{"text":"approx. 2 min after restart\n","color":"green","bold":true},{"text":"\n⚠ Action required:\n","color":"yellow","bold":true},{"text":"• Wrap up builds\n","color":"gray"},{"text":"• Return to base\n","color":"gray"},{"text":"• Secure inventory","color":"gray"}]}},{"text":" Please finish up!","color":"yellow"}]'
+          sleep 600
+
+          # 5 minutes
+          send 'tellraw @a [{"text":"[Server] ","color":"gold","bold":true},{"text":"Restart in ","color":"yellow"},{"text":"5 MINUTES","color":"red","bold":true,"hoverEvent":{"action":"show_text","contents":[{"text":"★ Daily Restart ★\n","color":"gold","bold":true},{"text":"Server goes down in 5 minutes\n","color":"yellow"},{"text":"Back online in approx. 2 minutes\n","color":"gray"},{"text":"💡 Tip: Find a safe spot!","color":"aqua","italic":true}]}},{"text":" ⚠","color":"gold","bold":true}]'
+          send 'title @a times 10 70 20'
+          send 'title @a subtitle {"text":"in 5 minutes","color":"yellow"}'
+          send 'title @a title {"text":"Server Restarting","color":"gold"}'
+          sleep 240
+
+          # 1 minute
+          send 'tellraw @a [{"text":"[Server] ","color":"red","bold":true},{"text":"RESTARTING IN ","color":"red","bold":true},{"text":"1 MINUTE!","color":"dark_red","bold":true,"underlined":true,"hoverEvent":{"action":"show_text","contents":[{"text":"⚡ RESTART IMMINENT ⚡\n","color":"red","bold":true},{"text":"Server stops in: ","color":"yellow"},{"text":"60 seconds\n","color":"red","bold":true},{"text":"Back online in ","color":"yellow"},{"text":"approx. 2 minutes\n","color":"green","bold":true},{"text":"\n🛡 Get to safety NOW!","color":"gold"}]}},{"text":" ⚠⚠","color":"red","bold":true}]'
+          send 'title @a times 10 70 20'
+          send 'title @a subtitle {"text":"in 1 minute","color":"yellow"}'
+          send 'title @a title {"text":"Server Restarting","color":"gold"}'
+          sleep 30
+
+          # 30 seconds
+          send 'tellraw @a [{"text":"[Server] ","color":"red","bold":true},{"text":"RESTARTING IN ","color":"red","bold":true},{"text":"30 SECONDS!","color":"dark_red","bold":true,"underlined":true},{"text":"\n>> Back online in approx. 2 minutes!","color":"gold","italic":true}]'
+          send 'title @a times 10 70 20'
+          send 'title @a subtitle {"text":"in 30 seconds","color":"yellow"}'
+          send 'title @a title {"text":"Server Restarting","color":"gold"}'
+          sleep 27
+
+          # 3, 2, 1
+          send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"3...","color":"red","bold":true}]'
+          send 'title @a times 5 15 5'
+          send 'title @a subtitle {"text":"in 3 seconds","color":"yellow","bold":true}'
+          send 'title @a title {"text":"RESTARTING","color":"red","bold":true}'
+          sleep 1
+
+          send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"2...","color":"red","bold":true}]'
+          send 'title @a subtitle {"text":"in 2 seconds","color":"yellow","bold":true}'
+          send 'title @a title {"text":"RESTARTING","color":"red","bold":true}'
+          sleep 1
+
+          send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"1...","color":"red","bold":true}]'
+          send 'title @a subtitle {"text":">> NOW <<","color":"red","bold":true}'
+          send 'title @a title {"text":"RESTARTING","color":"dark_red","bold":true}'
+          sleep 1
+
       - name: Restart Pterodactyl Server
         run: |
           curl -sf -X POST "${{ secrets.PTERODACTYL_PANEL_URL }}/api/client/servers/${{ secrets.PTERODACTYL_SERVER_ID }}/power" \
@@ -16,3 +84,12 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Accept: Application/vnd.pterodactyl.v1+json" \
             -d '{"signal": "restart"}'
+
+      - name: Update README timestamp
+        run: |
+          sed -i "s|_Last restart:.*|_Last restart: $(date -u '+%Y-%m-%d %H:%M UTC')_|" README.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update last restart timestamp" || echo "Nothing to commit"
+          git push
