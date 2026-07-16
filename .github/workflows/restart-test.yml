@@ -1,4 +1,4 @@
-name: Test Countdown + Restart
+name: Test Countdown + Restart + README
 
 on:
   workflow_dispatch:
@@ -11,6 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Compute expected restart time
+        run: |
+          NOW=$(date -u +%s)
+          ALIGNED=$(( ( (NOW + 10800) / 21600 ) * 21600 ))
+          echo "EXPECTED_RESTART=$(date -u -d "@$ALIGNED" '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_ENV"
+          echo "EXPECTED_EPOCH=$ALIGNED" >> "$GITHUB_ENV"
 
       - name: Countdown
         run: |
@@ -48,12 +55,19 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Accept: Application/vnd.pterodactyl.v1+json" \
             -d '{"signal": "restart"}'
+          echo "ACTUAL_RESTART=$(date -u '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_ENV"
+          echo "ACTUAL_EPOCH=$(date -u +%s)" >> "$GITHUB_ENV"
 
-      - name: Update README timestamp
+      - name: Update README timestamps
         run: |
-          sed -i "s|_Last restart:.*|_Last restart: $(date -u '+%Y-%m-%d %H:%M UTC')_|" README.md
+          DRIFT_MIN=$(( (ACTUAL_EPOCH - EXPECTED_EPOCH) / 60 ))
+          if [ "$DRIFT_MIN" -ge 0 ]; then DRIFT="+${DRIFT_MIN}m"; else DRIFT="${DRIFT_MIN}m"; fi
+
+          sed -i "s|_Expected last restart:.*|_Expected last restart: ${EXPECTED_RESTART}_ (manually triggered test run, not real numbers)|" README.md
+          sed -i "s|_Actual last restart:.*|_Actual last restart: ${ACTUAL_RESTART} (drift: ${DRIFT})_ (manually triggered test run, not real numbers)|" README.md
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "Update last restart timestamp" || echo "Nothing to commit"
+          git commit -m "Update restart timestamps (test run)" || echo "Nothing to commit"
           git push
