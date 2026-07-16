@@ -14,6 +14,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Compute expected restart time
+        run: |
+          NOW=$(date -u +%s)
+          ALIGNED=$(( ( (NOW + 10800) / 21600 ) * 21600 ))
+          echo "EXPECTED_RESTART=$(date -u -d "@$ALIGNED" '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_ENV"
+          echo "EXPECTED_EPOCH=$ALIGNED" >> "$GITHUB_ENV"
+
       - name: Warnings & countdown
         run: |
           PANEL="${{ secrets.PTERODACTYL_PANEL_URL }}"
@@ -60,20 +67,18 @@ jobs:
           send 'title @a title {"text":"Server Restarting","color":"gold"}'
           sleep 27
 
-          # 3 seconds
+          # 3, 2, 1
           send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"3...","color":"red","bold":true}]'
           send 'title @a times 5 15 5'
           send 'title @a subtitle {"text":"in 3 seconds","color":"yellow","bold":true}'
           send 'title @a title {"text":"RESTARTING","color":"red","bold":true}'
           sleep 1
 
-          # 2 seconds
           send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"2...","color":"red","bold":true}]'
           send 'title @a subtitle {"text":"in 2 seconds","color":"yellow","bold":true}'
           send 'title @a title {"text":"RESTARTING","color":"red","bold":true}'
           sleep 1
 
-          # 1 second
           send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"1...","color":"red","bold":true}]'
           send 'title @a subtitle {"text":">> NOW <<","color":"red","bold":true}'
           send 'title @a title {"text":"RESTARTING","color":"dark_red","bold":true}'
@@ -86,12 +91,19 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Accept: Application/vnd.pterodactyl.v1+json" \
             -d '{"signal": "restart"}'
+          echo "ACTUAL_RESTART=$(date -u '+%Y-%m-%d %H:%M UTC')" >> "$GITHUB_ENV"
+          echo "ACTUAL_EPOCH=$(date -u +%s)" >> "$GITHUB_ENV"
 
-      - name: Update README timestamp
+      - name: Update README timestamps
         run: |
-          sed -i "s|_Last restart:.*|_Last restart: $(date -u '+%Y-%m-%d %H:%M UTC')_|" README.md
+          DRIFT_MIN=$(( (ACTUAL_EPOCH - EXPECTED_EPOCH) / 60 ))
+          if [ "$DRIFT_MIN" -ge 0 ]; then DRIFT="+${DRIFT_MIN}m"; else DRIFT="${DRIFT_MIN}m"; fi
+
+          sed -i "s|\*\*Expected last restart:\*\*.*|**Expected last restart:** ${EXPECTED_RESTART}|" README.md
+          sed -i "s|\*\*Actual last restart:\*\*.*|**Actual last restart:** ${ACTUAL_RESTART} (drift: ${DRIFT})|" README.md
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "Update last restart timestamp" || echo "Nothing to commit"
+          git commit -m "Update restart timestamps" || echo "Nothing to commit"
           git push
