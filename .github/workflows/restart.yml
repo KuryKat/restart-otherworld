@@ -67,18 +67,20 @@ jobs:
           send 'title @a title {"text":"Server Restarting","color":"gold"}'
           sleep 27
 
-          # 3, 2, 1
+          # 3 seconds
           send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"3...","color":"red","bold":true}]'
           send 'title @a times 5 15 5'
           send 'title @a subtitle {"text":"in 3 seconds","color":"yellow","bold":true}'
           send 'title @a title {"text":"RESTARTING","color":"red","bold":true}'
           sleep 1
-
+          
+          # 2 seconds
           send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"2...","color":"red","bold":true}]'
           send 'title @a subtitle {"text":"in 2 seconds","color":"yellow","bold":true}'
           send 'title @a title {"text":"RESTARTING","color":"red","bold":true}'
           sleep 1
 
+          # 1 second
           send 'tellraw @a [{"text":"[Server] ","color":"dark_red","bold":true},{"text":"Server restarting in ","color":"red"},{"text":"1...","color":"red","bold":true}]'
           send 'title @a subtitle {"text":">> NOW <<","color":"red","bold":true}'
           send 'title @a title {"text":"RESTARTING","color":"dark_red","bold":true}'
@@ -99,8 +101,8 @@ jobs:
           DRIFT_MIN=$(( (ACTUAL_EPOCH - EXPECTED_EPOCH) / 60 ))
           if [ "$DRIFT_MIN" -ge 0 ]; then DRIFT="+${DRIFT_MIN}m"; else DRIFT="${DRIFT_MIN}m"; fi
 
-          sed -i "s|\*\*Expected last restart:\*\*.*|**Expected last restart:** ${EXPECTED_RESTART}|" README.md
-          sed -i "s|\*\*Actual last restart:\*\*.*|**Actual last restart:** ${ACTUAL_RESTART} (drift: ${DRIFT})|" README.md
+          sed -i "s|_Expected last restart:.*|_Expected last restart: ${EXPECTED_RESTART}_|" README.md
+          sed -i "s|_Actual last restart:.*|_Actual last restart: ${ACTUAL_RESTART} (drift: ${DRIFT})_|" README.md
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
