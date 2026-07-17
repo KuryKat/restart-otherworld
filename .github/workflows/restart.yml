@@ -1,8 +1,8 @@
 name: Scheduled Pterodactyl Restart
 
 on:
-  schedule:
-    - cron: '30 22,4,10,16 * * *'
+ # schedule:
+ #   - cron: '30 22,4,10,16 * * *'
   workflow_dispatch:
 
 permissions:
@@ -34,9 +34,9 @@ jobs:
               -H "Accept: Application/vnd.pterodactyl.v1+json" -d "$BODY"
           }
 
-          # 1 hour 30 minutes
-          send 'tellraw @a [{"text":"[Server] ","color":"gold","bold":true},{"text":"Heads up, restart in ","color":"aqua"},{"text":"1h 30m","color":"gold","bold":true,"hoverEvent":{"action":"show_text","contents":[{"text":"🕐 Restart Reminder 🕐\n","color":"aqua","bold":true},{"text":"Next scheduled restart: ","color":"gray"},{"text":"in 1 hour 30 minutes\n","color":"gold","bold":true},{"text":"Downtime: ","color":"gray"},{"text":"approx. 2 minutes\n","color":"yellow"},{"text":"\nNo rush, just a heads up!","color":"gray","italic":true}]}}]'
-          sleep 3600
+          # 1 hour
+          send 'tellraw @a [{"text":"[Server] ","color":"gold","bold":true},{"text":"Heads up, restart in ","color":"aqua"},{"text":"1 hour","color":"gold","bold":true,"hoverEvent":{"action":"show_text","contents":[{"text":"🕐 Restart Reminder 🕐\n","color":"aqua","bold":true},{"text":"Next scheduled restart: ","color":"gray"},{"text":"in 1 hour\n","color":"gold","bold":true},{"text":"Downtime: ","color":"gray"},{"text":"approx. 2 minutes\n","color":"yellow"},{"text":"\nNo rush, just a heads up!","color":"gray","italic":true}]}}]'
+          sleep 1800
 
           # 30 minutes
           send 'tellraw @a [{"text":"[Server] ","color":"gold","bold":true},{"text":"Scheduled restart in ","color":"yellow"},{"text":"30 minutes","color":"red","bold":true,"hoverEvent":{"action":"show_text","contents":[{"text":"⚡ Daily Maintenance ⚡\n","color":"yellow","bold":true},{"text":"Server goes down in: ","color":"gray"},{"text":"30 minutes\n","color":"red","bold":true},{"text":"Downtime: ","color":"gray"},{"text":"approx. 2 minutes\n","color":"yellow"},{"text":"\n💡 What to do:\n","color":"aqua","bold":true},{"text":"• Save your progress\n","color":"gray"},{"text":"• Finish up tasks\n","color":"gray"},{"text":"• Head to safe area","color":"gray"}]}},{"text":"\n💾 Make sure to save your progress!","color":"gray","italic":true}]'
