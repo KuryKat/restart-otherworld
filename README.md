@@ -4,8 +4,8 @@ This simple, yet complete and comprehensive, GitHub Action keeps my modded Minec
 
 **Restart times (UTC):** `00:00`, `06:00`, `12:00`, `18:00`
 
-_Expected last restart: 2026-07-17 00:00 UTC_
+_Expected last restart: 2026-07-17 06:00 UTC_
 
-_Actual last restart: 2026-07-17 00:53 UTC (drift: +53m)_
+_Actual last restart: 2026-07-17 08:04 UTC (drift: +124m)_
 
 Disclaimer: Times are not precise given GitHub's limitations on scheduled tasks, a different approach might be required soon if it proves unbearable.
