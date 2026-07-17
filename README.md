@@ -8,4 +8,4 @@ _Expected last restart: 2026-07-17 06:00 UTC_
 
 _Actual last restart: 2026-07-17 08:04 UTC (drift: +124m)_
 
-Disclaimer: Times are not precise given GitHub's limitations on scheduled tasks, a different approach might be required soon if it proves unbearable.
+Disclaimer: GitHub's own scheduled triggers can drift by 60-90+ minutes under load (see commit history for how bad this got), so this workflow no longer relies on `schedule:` to start the clock. A Cloudflare Worker using a Cron Trigger to a `scheduled()` event handler calls GitHub's `workflow_dispatch` API at the exact intended time instead, which starts almost instantly since it isn't sitting in the same deprioritized queue as scheduled runs.
